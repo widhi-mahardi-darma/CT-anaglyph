@@ -4,14 +4,22 @@
 - Spefikasi layar 768X1366 (potrait)
 '''
 
+''' 1-3-2022
+menambahkan pilihan anaglip 2 citra
+'''
 
 import tkinter as tk
+import  numpy as np
 import cv2
 import tkinter
 import tempfile
 import os
+import imutils
 from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
+from skimage import io, img_as_float
+from skimage.filters import unsharp_mask
+import PIL, PIL.Image, PIL.ImageOps, PIL.ImageEnhance
 
 
 # Layout
@@ -47,74 +55,109 @@ label2.grid_propagate(0)
 label2.columnconfigure(1, weight=1)
 
 def File():
-    def scale(value=None):  # digunakan image sequence
-        global Over
-        Over = (int(overlapping.get()))
+    global rr
+    global ee
 
-        # Menampilkan citra
-        size = (int(r / rr), int(e / ee))
-        Tampil = cv2.resize(filePaths[Over], size, interpolation=cv2.INTER_AREA)
-        pillow_img = Image.fromarray(Tampil)
-        uu = ImageTk.PhotoImage(pillow_img)
-        label.configure(image=uu)
-        label.image = uu
+    def Satu():
+
+        # Upload Image L
+        path_image = filedialog. \
+            askopenfilename(initialdir="/", title="Image Left",
+                            filetypes=(
+                                ("tiff", "*.tiff"), ("tif", "*.tif"),
+                                ('bmp', "*.bmp"), ("jpg", "*.jpg"),
+                                ("png", "*.png"), ("all file", "*.txt")
+                            ))
+        global imgL
+        imgL = PIL.Image.open(path_image, mode='r').convert('RGB')
+        imgL = PIL.Image.open(path_image, mode='r').convert('L')
+
+        # upload image R
+        path_image = filedialog. \
+            askopenfilename(initialdir="/", title="Image Right",
+                            filetypes=(
+                                ("tiff", "*.tiff"), ("tif", "*.tif"),
+                                ('bmp', "*.bmp"), ("jpg", "*.jpg"),
+                                ("png", "*.png"), ("all file", "*.txt")
+                            ))
+
+        global imgR
+        imgR = PIL.Image.open(path_image, mode='r').convert('RGB')
+        imgR = PIL.Image.open(path_image, mode='r').convert('L')
+        display2.destroy()
+
+
+
+    # Display 2
+    width = 350
+    height = 250
+    display2 = tk.Tk()
+    display2.minsize(width=width, height=height)
+    display2.resizable(True, True)
+
+    #button
+    # Button
+    btn_pilihan1 = tkinter.Button(display2, text="1", width=10, command=Satu)
+    btn_pilihan1.place(x=50, y=100)
+
+    # btn_pilihan2 = tkinter.Button(display2, text="2", width=10, command=Dua)
+    # btn_pilihan2.place(x=100, y=150)
+
+
+    display2.title("Menu")
+    display2.mainloop()
+   
+
+
+
+
+
+def Save():
+    global lab_img
+    global trim
+    global nilai_pixel
+    global nilai_unsharp
+    global jumlah
+    global filePaths
+
+    file = filedialog.asksaveasfilename(initialdir=os.getcwd(), title='save image')
+
+    for i in range(jumlah):
         path = tempfile.gettempdir()
-        cv2.imwrite(os.path.join(path, 'labCT.tiff'), filePaths[Over])
 
-    fln = filedialog.askopenfilename(multiple=True, initialdir="/", title="select file",
-                                     filetypes=(
-                                         ("tiff", "*.tiff"), ("tif", "*.tif"), ("bmp", "*.bmp"), ("jpg", "*.jpg"),
-                                         ("png", "*.png"), ("all file", "*.txt")))
+        # hasil 8 bit menjadi 16 bit
+        img = np.array(hasil, dtype=np.uint16)
+        img = cv2.normalize(img, dst=None, alpha=0, beta=65535, norm_type=cv2.NORM_MINMAX)  # hasil 16 bit
 
-    var = display.tk.splitlist(fln)
-    filePaths = []
+        io.imsave((file + str(jumlah - i)) + '.tiff', img)
+    messagebox.showinfo('Save', ' Semua citra telah tersimpan')
 
-    jumlah = len(var)
-    print('jumlah citra:', jumlah)
+def Anaglyph():
 
-    for f in var:
-        print(f)
-        a = cv2.imread(f)
-        filePaths.append(a)
+    global imgR, imgL
 
-    awal = cv2.cvtColor(filePaths[0], cv2.COLOR_BGR2GRAY)
+    # color filtering
+    red_img = PIL.ImageOps.colorize(imgL, (0, 0, 0), (255, 0, 0))
+    cyan_img = PIL.ImageOps.colorize(imgR, (0, 0, 0), (0, 255, 255))
 
-    path = tempfile.gettempdir()
-    cv2.imwrite(os.path.join(path, 'labCT.tiff'), filePaths[0])
+    blend = PIL.Image.blend(red_img, cyan_img, 0.5)
+    np_blend = np.array(blend)
+    im_comb = imutils.resize(np_blend, height=600)
 
-    # untuk menampilkan UI
-    e, r = awal.shape
+    im_comb = cv2.cvtColor(im_comb, cv2.COLOR_BGR2RGB)
+    r,e,o=im_comb.shape
 
-    if r > 0 and r < 1799:
-        rr = 1.15
-        ee = 1.15
+    numpy_hor = np.concatenate((red_img, cyan_img), axis=1)
+    numpy_hor = cv2.cvtColor(numpy_hor, cv2.COLOR_BGR2RGB)
+    cv2.imwrite('Red an Cyan.tiff', cv2.resize(numpy_hor, (0, 0), None, .7, .7))
+    red_cyan = Image.open('Red an Cyan.tiff')
 
-    if r > 1800 and r < 3700:
-        rr = 3.05
-        ee = 2.55
+    cv2.imwrite('Anaglyph.tiff', im_comb)
+    result = Image.open('Anaglyph.tiff')
+    result.show()
 
-    if r > 3700 and r < 3899:
-        rr = 5.95
-        ee = 6.15
 
-    if r > 3900 and r < 5700:
-        rr = 6.3
-        ee = 6.15
 
-    if r > 5701:
-        rr = 9.55
-        ee = 10.25
-
-    size = (int(r / rr), int(e / ee))
-    Tampil = cv2.resize(filePaths[0], size, interpolation=cv2.INTER_AREA)
-    pillow_img = Image.fromarray(Tampil)
-    uu = ImageTk.PhotoImage(pillow_img)
-    label.configure(image=uu)
-    label.image = uu
-
-    overlapping = tkinter.Scale(display, from_=0, to=jumlah - 1, length=674,
-                                resolution=1, showvalue=0, orient=tkinter.HORIZONTAL, command=scale)
-    overlapping.place(x=20, y=525)
 
 
 # Menubar
@@ -125,6 +168,11 @@ display.config(menu=Menu)
 file_menu= tkinter.Menu(Menu)
 Menu.add_cascade(label='File', menu=file_menu)
 file_menu.add_command(label='Open', command=File)
+file_menu.add_command(label ='Save', command=Save)
+
+#Button
+btn_file = tkinter.Button(display, text="Anaglyph", width=10, command=Anaglyph)
+btn_file.place(x=25, y=1100)
 
 # Layout
 display.title("CT Anaglyph")
