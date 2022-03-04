@@ -15,27 +15,36 @@ def imgR():
     path_image = filedialog.\
         askopenfilename(initialdir="/", title="select file",
         filetypes=(
-        ("tiff", "*.tiff"),("tif", "*.tif"),
-        ('bmp', "*.bmp"), ("jpg", "*.jpg"),
-        ("png", "*.png"), ("all file", "*.txt")
+            ("Image", "*.tiff"), ("Image", "*.tif"),
+            ('Image', "*.bmp"), ("Image", "*.jpg"),
+            ("Image", "*.png"), ("Image", "*.txt")
         ))
+    print(path_image)
 
     global imgR
-    imgR=PIL.Image.open(path_image,mode='r').convert('RGB')
-    imgR = PIL.Image.open(path_image, mode='r').convert('L')
+    imgR=cv2.imread(path_image)
+    cv2.imwrite(os.path.join(path, 'imgR.tiff'), imgR)
+    imgR=PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgR.tiff',mode='r').convert('RGB')
+    imgR = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgR.tiff', mode='r').convert('L')
 
 def imgL():
     path_image = filedialog. \
         askopenfilename(initialdir="/", title="select file",
         filetypes=(
-        ("tiff", "*.tiff"), ("tif", "*.tif"),
-        ('bmp', "*.bmp"), ("jpg", "*.jpg"),
-        ("png", "*.png"), ("all file", "*.txt")
+            ("Image", "*.tiff"), ("Image", "*.tif"),
+            ('Image', "*.bmp"), ("Image", "*.jpg"),
+            ("Image", "*.png"), ("Image", "*.txt")
         ))
+    print(path_image)
 
     global imgL
-    imgL=PIL.Image.open(path_image,mode='r').convert('RGB')
-    imgL = PIL.Image.open(path_image, mode='r').convert('L')
+    imgL = cv2.imread(path_image)
+    cv2.imwrite(os.path.join(path, 'imgL.tiff'), imgL)
+    imgL=PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgL.tiff',mode='r').convert('RGB')
+    imgL = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgL.tiff', mode='r').convert('L')
+
+
+
 
 def fil():
     global imgR,imgL
@@ -44,8 +53,14 @@ def fil():
         red_img=PIL.ImageOps.colorize(imgL,(0,0,0),(255,0,0))
         cyan_img=PIL.ImageOps.colorize(imgR,(0,0,0),(0,255,255))
 
+        # red_img = np.array([255,0,0])
+        # cyan_img = np.array([0,255,255])
+
+
+
 
         blend=PIL.Image.blend(red_img,cyan_img,0.5)
+        #blend=cv2. addWeighted(red_img,0.5,cyan_img,0.5)
         np_blend=np.array(blend)
         im_comb= imutils.resize(np_blend,height=600)
 
