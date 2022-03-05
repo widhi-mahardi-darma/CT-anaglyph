@@ -111,21 +111,29 @@ def File():
         global jumlah_img
 
         jumlah_img=len(var)
-        #print("jumlah image:", jumlah_img)
+        print("jumlah image:", jumlah_img)
 
         for f in var:
             a=cv2.imread(f)
             image.append(a)
 
         for i in range(jumlah_img):
+            image_keL = i
+            print('image L:', image_keL)
 
             global imgL
-            cv2.imwrite(os.path.join(path, 'imgL.tiff'), image[jumlah_img-i-1])
+            cv2.imwrite(os.path.join(path, 'imgL.tiff'), image[image_keL])
             imgL = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgL.tiff', mode='r').convert('RGB')
             imgL = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgL.tiff', mode='r').convert('L')
 
+            image_keR= i+5
+            if image_keR >= jumlah_img:
+                image_keR= image_keR- jumlah_img
+
+            print('image R:',image_keR)
+
             global imgR
-            cv2.imwrite(os.path.join(path, 'imgR.tiff'), image[9])
+            cv2.imwrite(os.path.join(path, 'imgR.tiff'), image[image_keR])
             imgR = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgR.tiff', mode='r').convert('RGB')
             imgR = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgR.tiff', mode='r').convert('L')
 
