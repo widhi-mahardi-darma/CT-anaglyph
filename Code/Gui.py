@@ -108,6 +108,7 @@ def File():
 
         var=display.tk.splitlist(path_image)
         image=[]
+        global jumlah_img
 
         jumlah_img=len(var)
         #print("jumlah image:", jumlah_img)
@@ -115,23 +116,47 @@ def File():
         for f in var:
             a=cv2.imread(f)
             image.append(a)
-        #cv2.imwrite('image.tiff', image[4])
 
-        global imgL
-        #imgL = cv2.imread(image[(1)])
-        cv2.imwrite(os.path.join(path, 'imgL.tiff'), image[1])
-        imgL = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgL.tiff', mode='r').convert('RGB')
-        imgL = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgL.tiff', mode='r').convert('L')
-        imgL.show()
+        for i in range(jumlah_img):
 
+            global imgL
+            cv2.imwrite(os.path.join(path, 'imgL.tiff'), image[jumlah_img-i-1])
+            imgL = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgL.tiff', mode='r').convert('RGB')
+            imgL = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgL.tiff', mode='r').convert('L')
 
-        global imgR
-        #imgR = cv2.imread(image[10])
-        cv2.imwrite(os.path.join(path, 'imgR.tiff'), image[9])
-        imgR = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgR.tiff', mode='r').convert('RGB')
-        imgR = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgR.tiff', mode='r').convert('L')
+            global imgR
+            cv2.imwrite(os.path.join(path, 'imgR.tiff'), image[9])
+            imgR = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgR.tiff', mode='r').convert('RGB')
+            imgR = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgR.tiff', mode='r').convert('L')
 
-        imgR.show()
+            red_img = PIL.ImageOps.colorize(imgL, (0, 0, 0), (255, 0, 0))
+            cyan_img = PIL.ImageOps.colorize(imgR, (0, 0, 0), (0, 255, 255))
+
+            blend = PIL.Image.blend(red_img, cyan_img, 0.5)
+            np_blend = np.array(blend)
+            im_comb = imutils.resize(np_blend, height=600)
+
+            im_comb = cv2.cvtColor(im_comb, cv2.COLOR_BGR2RGB)
+            file = 'Anaglyph'
+            cv2.imwrite(os.path.join(path, file + str(jumlah_img - i)) + '.tiff', im_comb)
+
+        def scale(value:None):
+            global Over
+            Over = (int(sequence.get()))
+            path = tempfile.gettempdir()
+
+            Clahe = cv2.imread(os.path.join(path, 'Anaglyph' + str(Over + 1)) + '.tiff')
+
+            #size = (int(r / rr), int(e / ee))
+            Tampil = cv2.resize(Clahe, (500,500), interpolation=cv2.INTER_AREA)
+            pillow_img = Image.fromarray(Tampil)
+            uu = ImageTk.PhotoImage(pillow_img)
+            label2.configure(image=uu)
+            label2.image = uu
+
+        sequence = tkinter.Scale(display, from_=0, to=jumlah_img- 1, length=674,
+                                 resolution=1, showvalue=0, orient=tkinter.HORIZONTAL, command=scale)
+        sequence.place(x=20, y=525)
 
 
     # Display 2
