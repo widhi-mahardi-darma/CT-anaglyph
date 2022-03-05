@@ -4,8 +4,15 @@
 - Spefikasi layar 768X1366 (potrait)
 '''
 
-''' 1-3-2022
-menambahkan pilihan anaglip 2 citra
+''' 
+#1-3-2022
+- menambahkan pilihan anaglip 2 citra
+# 2-3- 2022
+- menampilkan citra
+- Mengganti jpg mejadi Image
+
+# 4-3-2022
+- Hasil save temp
 '''
 
 import tkinter as tk
@@ -57,6 +64,7 @@ label2.columnconfigure(1, weight=1)
 def File():
     global rr
     global ee
+    path = tempfile.gettempdir()
 
     def Satu():
 
@@ -64,9 +72,9 @@ def File():
         path_image = filedialog. \
             askopenfilename(initialdir="/", title="Image Left",
                             filetypes=(
-                                ("tiff", "*.tiff"), ("tif", "*.tif"),
-                                ('bmp', "*.bmp"), ("jpg", "*.jpg"),
-                                ("png", "*.png"), ("all file", "*.txt")
+                                ("Image", "*.tiff"), ("Image", "*.tif"),
+                                ('Image', "*.bmp"), ("Image", "*.jpg"),
+                                ("Image", "*.png"), ("Image", "*.txt")
                             ))
         global imgL
         imgL = PIL.Image.open(path_image, mode='r').convert('RGB')
@@ -76,9 +84,9 @@ def File():
         path_image = filedialog. \
             askopenfilename(initialdir="/", title="Image Right",
                             filetypes=(
-                                ("tiff", "*.tiff"), ("tif", "*.tif"),
-                                ('bmp', "*.bmp"), ("jpg", "*.jpg"),
-                                ("png", "*.png"), ("all file", "*.txt")
+                                ("Image", "*.tiff"), ("Image", "*.tif"),
+                                ('Image', "*.bmp"), ("Image", "*.jpg"),
+                                ("Image", "*.png"), ("Image", "*.txt")
                             ))
 
         global imgR
@@ -86,6 +94,44 @@ def File():
         imgR = PIL.Image.open(path_image, mode='r').convert('L')
         display2.destroy()
 
+    def Dua():
+        # Upload Image
+        path_image = filedialog. \
+            askopenfilename(multiple=True, initialdir="/", title="Image Left",
+                            filetypes=(
+                                ("Image", "*.tiff"), ("Image", "*.tif"),
+                                ('Image', "*.bmp"), ("Image", "*.jpg"),
+                                ("Image", "*.png"), ("Image", "*.txt")
+                            ))
+
+        display2.destroy()
+
+        var=display.tk.splitlist(path_image)
+        image=[]
+
+        jumlah_img=len(var)
+        #print("jumlah image:", jumlah_img)
+
+        for f in var:
+            a=cv2.imread(f)
+            image.append(a)
+        #cv2.imwrite('image.tiff', image[4])
+
+        global imgL
+        #imgL = cv2.imread(image[(1)])
+        cv2.imwrite(os.path.join(path, 'imgL.tiff'), image[1])
+        imgL = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgL.tiff', mode='r').convert('RGB')
+        imgL = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgL.tiff', mode='r').convert('L')
+        imgL.show()
+
+
+        global imgR
+        #imgR = cv2.imread(image[10])
+        cv2.imwrite(os.path.join(path, 'imgR.tiff'), image[9])
+        imgR = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgR.tiff', mode='r').convert('RGB')
+        imgR = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgR.tiff', mode='r').convert('L')
+
+        imgR.show()
 
 
     # Display 2
@@ -100,16 +146,12 @@ def File():
     btn_pilihan1 = tkinter.Button(display2, text="1", width=10, command=Satu)
     btn_pilihan1.place(x=50, y=100)
 
-    # btn_pilihan2 = tkinter.Button(display2, text="2", width=10, command=Dua)
-    # btn_pilihan2.place(x=100, y=150)
+    btn_pilihan2 = tkinter.Button(display2, text="2", width=10, command=Dua)
+    btn_pilihan2.place(x=100, y=150)
 
 
     display2.title("Menu")
     display2.mainloop()
-   
-
-
-
 
 
 def Save():
@@ -177,8 +219,3 @@ btn_file.place(x=25, y=1100)
 # Layout
 display.title("CT Anaglyph")
 display.mainloop()
-
-
-
-
-
