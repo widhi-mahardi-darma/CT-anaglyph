@@ -10,9 +10,10 @@
 # 2-3- 2022
 - menampilkan citra
 - Mengganti jpg mejadi Image
-
 # 4-3-2022
 - Hasil save temp
+# 7-3-2022
+- membenarkan layout
 '''
 
 import tkinter as tk
@@ -104,64 +105,83 @@ def File():
                                 ("Image", "*.png"), ("Image", "*.txt")
                             ))
 
+        # menunut display 2
         display2.destroy()
 
+        #split image
         var=display.tk.splitlist(path_image)
         image=[]
         global jumlah_img
 
+        # jumlah banyak citra
         jumlah_img=len(var)
         print("jumlah image:", jumlah_img)
-
         for f in var:
             a=cv2.imread(f)
             image.append(a)
 
+        # input image
+        image_overlap=20
+
         for i in range(jumlah_img):
-            image_keL = i
+
+            # Image Left
+            image_keL = i   #jumlah image input
             print('image L:', image_keL)
 
+            # Input image left
             global imgL
             cv2.imwrite(os.path.join(path, 'imgL.tiff'), image[image_keL])
             imgL = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgL.tiff', mode='r').convert('RGB')
             imgL = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgL.tiff', mode='r').convert('L')
 
-            image_keR= i+5
+            #Image Right
+            image_keR= i+image_overlap
             if image_keR >= jumlah_img:
                 image_keR= image_keR- jumlah_img
 
             print('image R:',image_keR)
 
+            #Input image right
             global imgR
             cv2.imwrite(os.path.join(path, 'imgR.tiff'), image[image_keR])
             imgR = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgR.tiff', mode='r').convert('RGB')
             imgR = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgR.tiff', mode='r').convert('L')
 
-            red_img = PIL.ImageOps.colorize(imgL, (0, 0, 0), (255, 0, 0))
-            cyan_img = PIL.ImageOps.colorize(imgR, (0, 0, 0), (0, 255, 255))
+            # Filter Color
+            red_img = PIL.ImageOps.colorize(imgL, (0, 0, 0), (255, 0, 0)) # Red
+            cyan_img = PIL.ImageOps.colorize(imgR, (0, 0, 0), (0, 255, 255)) # Image Cyan
 
+            # Image Blendig Red and Cyan
             blend = PIL.Image.blend(red_img, cyan_img, 0.5)
             np_blend = np.array(blend)
             im_comb = imutils.resize(np_blend, height=600)
+            im_comb = cv2.cvtColor(im_comb, cv2.COLOR_BGR2RGB) # Hasil Anaglyph
 
-            im_comb = cv2.cvtColor(im_comb, cv2.COLOR_BGR2RGB)
+            # Nama File yang save
             file = 'Anaglyph'
             cv2.imwrite(os.path.join(path, file + str(jumlah_img - i)) + '.tiff', im_comb)
+
+            #menampilkan citra
+            img = im_comb.resize((500, 500))
+            uu = ImageTk.PhotoImage(img)
+            label.configure(image=uu)
+            label.image = uu
 
         def scale(value:None):
             global Over
             Over = (int(sequence.get()))
             path = tempfile.gettempdir()
 
-            Clahe = cv2.imread(os.path.join(path, 'Anaglyph' + str(Over + 1)) + '.tiff')
+            img = Image.open(os.path.join(path, 'Anaglyph' + str(Over + 1)) + '.tiff')
 
             #size = (int(r / rr), int(e / ee))
-            Tampil = cv2.resize(Clahe, (500,500), interpolation=cv2.INTER_AREA)
-            pillow_img = Image.fromarray(Tampil)
-            uu = ImageTk.PhotoImage(pillow_img)
-            label2.configure(image=uu)
-            label2.image = uu
+            img = img.resize((500, 500))
+            uu = ImageTk.PhotoImage(img)
+            label.configure(image=uu)
+            label.image = uu
 
+        #Scale
         sequence = tkinter.Scale(display, from_=0, to=jumlah_img- 1, length=674,
                                  resolution=1, showvalue=0, orient=tkinter.HORIZONTAL, command=scale)
         sequence.place(x=20, y=525)
@@ -207,33 +227,6 @@ def Save():
         io.imsave((file + str(jumlah - i)) + '.tiff', img)
     messagebox.showinfo('Save', ' Semua citra telah tersimpan')
 
-def Anaglyph():
-
-    global imgR, imgL
-
-    # color filtering
-    red_img = PIL.ImageOps.colorize(imgL, (0, 0, 0), (255, 0, 0))
-    cyan_img = PIL.ImageOps.colorize(imgR, (0, 0, 0), (0, 255, 255))
-
-    blend = PIL.Image.blend(red_img, cyan_img, 0.5)
-    np_blend = np.array(blend)
-    im_comb = imutils.resize(np_blend, height=600)
-
-    im_comb = cv2.cvtColor(im_comb, cv2.COLOR_BGR2RGB)
-    r,e,o=im_comb.shape
-
-    numpy_hor = np.concatenate((red_img, cyan_img), axis=1)
-    numpy_hor = cv2.cvtColor(numpy_hor, cv2.COLOR_BGR2RGB)
-    cv2.imwrite('Red an Cyan.tiff', cv2.resize(numpy_hor, (0, 0), None, .7, .7))
-    red_cyan = Image.open('Red an Cyan.tiff')
-
-    cv2.imwrite('Anaglyph.tiff', im_comb)
-    result = Image.open('Anaglyph.tiff')
-    result.show()
-
-
-
-
 
 # Menubar
 Menu=tkinter.Menu(display)
@@ -246,8 +239,8 @@ file_menu.add_command(label='Open', command=File)
 file_menu.add_command(label ='Save', command=Save)
 
 #Button
-btn_file = tkinter.Button(display, text="Anaglyph", width=10, command=Anaglyph)
-btn_file.place(x=25, y=1100)
+#btn_file = tkinter.Button(display, text="Anaglyph", width=10, command=Anaglyph)
+#btn_file.place(x=25, y=1100)
 
 # Layout
 display.title("CT Anaglyph")
