@@ -14,6 +14,8 @@
 - Hasil save temp
 # 7-3-2022
 - membenarkan layout
+# 8-3-2022
+- menampilkan hasil citra analgpyh
 '''
 
 import tkinter as tk
@@ -63,8 +65,7 @@ label2.grid_propagate(0)
 label2.columnconfigure(1, weight=1)
 
 def File():
-    global rr
-    global ee
+
     path = tempfile.gettempdir()
 
     def Satu():
@@ -77,6 +78,7 @@ def File():
                                 ('Image', "*.bmp"), ("Image", "*.jpg"),
                                 ("Image", "*.png"), ("Image", "*.txt")
                             ))
+
         global imgL
         imgL = PIL.Image.open(path_image, mode='r').convert('RGB')
         imgL = PIL.Image.open(path_image, mode='r').convert('L')
@@ -94,6 +96,45 @@ def File():
         imgR = PIL.Image.open(path_image, mode='r').convert('RGB')
         imgR = PIL.Image.open(path_image, mode='r').convert('L')
         display2.destroy()
+
+        # Filter Color
+        red_img = PIL.ImageOps.colorize(imgL, (0, 0, 0), (255, 0, 0))  # Red
+        cyan_img = PIL.ImageOps.colorize(imgR, (0, 0, 0), (0, 255, 255))  # Image Cyan
+
+        # Image Blendig Red and Cyan
+        blend = PIL.Image.blend(red_img, cyan_img, 0.5)
+        np_blend = np.array(blend)
+        im_comb = imutils.resize(np_blend, height=600)
+        im_comb = cv2.cvtColor(im_comb, cv2.COLOR_BGR2RGB)  # Hasil Anaglyph
+
+        #image concatenate
+        numpy_hor = np.concatenate((red_img, cyan_img), axis=1)
+        numpy_hor = cv2.cvtColor(numpy_hor, cv2.COLOR_BGR2RGB)
+        print(numpy_hor.shape)
+
+        # shape image
+        a,b,c=numpy_hor.shape
+
+        #Shape
+        cv2.imwrite(os.path.join(path,'Red an Cyan.tiff'), cv2.resize(numpy_hor, (0, 0), None, .7, .7))
+        img_con= Image.open(os.path.join(path, 'Red an Cyan.tiff'))
+
+        # menampilkan citra awal
+        img_con = img_con.resize((int(b/1.7),int(a/1.7)), Image.ANTIALIAS)
+        uu = ImageTk.PhotoImage(img_con)
+        label.configure(image=uu)
+        label.image = uu
+
+        # Nama File yang save
+        q, w,e = im_comb.shape
+        cv2.imwrite(os.path.join(path, 'Anaglyph.tiff'), im_comb)
+        img = Image.open(os.path.join(path, 'Anaglyph.tiff'))
+
+        # menampilkan hasil citra
+        img = img.resize((int(w/1.5), int(q/1.5)), Image.ANTIALIAS)
+        uu = ImageTk.PhotoImage(img)
+        label2.configure(image=uu)
+        label2.image = uu
 
     def Dua():
         # Upload Image
@@ -158,33 +199,56 @@ def File():
             im_comb = imutils.resize(np_blend, height=600)
             im_comb = cv2.cvtColor(im_comb, cv2.COLOR_BGR2RGB) # Hasil Anaglyph
 
-            # Nama File yang save
-            file = 'Anaglyph'
-            cv2.imwrite(os.path.join(path, file + str(jumlah_img - i)) + '.tiff', im_comb)
+            # image concatenate
+            numpy_hor = np.concatenate((red_img, cyan_img), axis=1)
+            numpy_hor = cv2.cvtColor(numpy_hor, cv2.COLOR_BGR2RGB)
+            a,b,c=numpy_hor.shape
+            cv2.imwrite(os.path.join(path, 'Red an Cyan.tiff'), cv2.resize(numpy_hor, (0, 0), None, .7, .7))
+            img_con = Image.open(os.path.join(path, 'Red an Cyan.tiff'))
 
-            #menampilkan citra
-            img = im_comb.resize((500, 500))
-            uu = ImageTk.PhotoImage(img)
+            # menampilkan citra awal
+            img_con = img_con.resize((int(b / 1.7), int(a / 1.7)), Image.ANTIALIAS)
+            uu = ImageTk.PhotoImage(img_con)
             label.configure(image=uu)
             label.image = uu
 
+            # Nama File yang save
+            global q; global w
+            q1, w1, e = im_comb.shape
+            file = 'Anaglyph'
+            cv2.imwrite(os.path.join(path, file + str(jumlah_img - i)) + '.tiff', im_comb)
+            img = Image.open(os.path.join(path, 'Anaglyph' + str(1)) + '.tiff')
+
+            #menampilkan hasil citra
+            # Shape
+            q=int(q1/1); w=int(w1/1)
+            # menampilkan citra
+            img = img.resize((w,q), Image.ANTIALIAS)
+            uu = ImageTk.PhotoImage(img)
+            label2.configure(image=uu)
+            label2.image = uu
+
         def scale(value:None):
-            global Over
+            global Over; global q; global w
             Over = (int(sequence.get()))
             path = tempfile.gettempdir()
 
+            # Open Image
             img = Image.open(os.path.join(path, 'Anaglyph' + str(Over + 1)) + '.tiff')
 
-            #size = (int(r / rr), int(e / ee))
-            img = img.resize((500, 500))
+            # Shape Image
+            q=int(q1/1);w=int(w1/1)
+
+            # menampilkan citra scale
+            img = img.resize((w, q), Image.ANTIALIAS)
             uu = ImageTk.PhotoImage(img)
-            label.configure(image=uu)
-            label.image = uu
+            label2.configure(image=uu)
+            label2.image = uu
 
         #Scale
         sequence = tkinter.Scale(display, from_=0, to=jumlah_img- 1, length=674,
                                  resolution=1, showvalue=0, orient=tkinter.HORIZONTAL, command=scale)
-        sequence.place(x=20, y=525)
+        sequence.place(x=20, y=1075)
 
 
     # Display 2
@@ -202,10 +266,8 @@ def File():
     btn_pilihan2 = tkinter.Button(display2, text="2", width=10, command=Dua)
     btn_pilihan2.place(x=100, y=150)
 
-
     display2.title("Menu")
     display2.mainloop()
-
 
 def Save():
     global lab_img
@@ -237,10 +299,6 @@ file_menu= tkinter.Menu(Menu)
 Menu.add_cascade(label='File', menu=file_menu)
 file_menu.add_command(label='Open', command=File)
 file_menu.add_command(label ='Save', command=Save)
-
-#Button
-#btn_file = tkinter.Button(display, text="Anaglyph", width=10, command=Anaglyph)
-#btn_file.place(x=25, y=1100)
 
 # Layout
 display.title("CT Anaglyph")
