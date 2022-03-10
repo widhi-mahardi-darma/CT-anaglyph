@@ -16,6 +16,10 @@
 - membenarkan layout
 # 8-3-2022
 - menampilkan hasil citra analgpyh
+#9-3-2022
+-zoom to fit
+#10-3-2022
+-mencari kesalahan saat membaca output citra
 '''
 
 import tkinter as tk
@@ -24,6 +28,7 @@ import cv2
 import tkinter
 import tempfile
 import os
+import sys
 import imutils
 from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
@@ -98,6 +103,7 @@ def File():
         display2.destroy()
 
         # Filter Color
+
         red_img = PIL.ImageOps.colorize(imgL, (0, 0, 0), (255, 0, 0))  # Red
         cyan_img = PIL.ImageOps.colorize(imgR, (0, 0, 0), (0, 255, 255))  # Image Cyan
 
@@ -162,39 +168,61 @@ def File():
             image.append(a)
 
         # input image
-        image_overlap=20
+        #image_overlap=20
 
         for i in range(jumlah_img):
 
             # Image Left
-            image_keL = i   #jumlah image input
-            print('image L:', image_keL)
+            image_keL = i  # jumlah image input
 
-            # Input image left
-            global imgL
-            cv2.imwrite(os.path.join(path, 'imgL.tiff'), image[image_keL])
-            imgL = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgL.tiff', mode='r').convert('RGB')
-            imgL = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgL.tiff', mode='r').convert('L')
+            # Image Right
+            image_keR = i + 20
 
-            #Image Right
-            image_keR= i+image_overlap
-            if image_keR >= jumlah_img:
-                image_keR= image_keR- jumlah_img
+            if image_keR >= jumlah_img :
+                image_keR = image_keR - jumlah_img
+                print('image L:>', image_keL, 'nomor',i)
+                print('image R>:', image_keR)
 
-            print('image R:',image_keR)
+                # Input image left (dibalik R ke L)
+                global imgL
+                cv2.imwrite(os.path.join(path, 'imgL.tiff'), image[image_keL])
+                imgL = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgL.tiff', mode='r').convert('RGB')
+                imgL = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgL.tiff', mode='r').convert('L')
 
-            #Input image right
-            global imgR
-            cv2.imwrite(os.path.join(path, 'imgR.tiff'), image[image_keR])
-            imgR = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgR.tiff', mode='r').convert('RGB')
-            imgR = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgR.tiff', mode='r').convert('L')
+                # Input image right (dan sebaliknya)
+                global imgR
+                cv2.imwrite(os.path.join(path, 'imgR.tiff'), image[image_keR])
+                imgR = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgR.tiff', mode='r').convert('RGB')
+                imgR = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgR.tiff', mode='r').convert('L')
 
-            # Filter Color
-            red_img = PIL.ImageOps.colorize(imgL, (0, 0, 0), (255, 0, 0)) # Red
-            cyan_img = PIL.ImageOps.colorize(imgR, (0, 0, 0), (0, 255, 255)) # Image Cyan
+                # Filter Color
+                red_img = PIL.ImageOps.colorize(imgL, (0, 0, 0), (255, 0, 0))  # Red
+                cyan_img = PIL.ImageOps.colorize(imgR, (0, 0, 0), (0, 255, 255))  # Image Cyan
+                blend = PIL.Image.blend(red_img, cyan_img, 0.5)
+
+
+            else:
+                print('image L:', image_keL, 'nomor', i)
+                print('image R:', image_keR)
+
+                # Input image left
+                cv2.imwrite(os.path.join(path, 'imgL.tiff'), image[image_keL])
+                # cv2.imwrite(('Lllllxxxx'+str(i)+'.tiff'), image[image_keL])
+                imgL = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgL.tiff', mode='r').convert('RGB')
+                imgL = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgL.tiff', mode='r').convert('L')
+
+                # Input image right
+                cv2.imwrite(os.path.join(path, 'imgR.tiff'), image[image_keR])
+                # cv2.imwrite(('Rrrrrrxxxx' + str(i) + '.tiff'), image[image_keR])
+                imgR = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgR.tiff', mode='r').convert('RGB')
+                imgR = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgR.tiff', mode='r').convert('L')
 
             # Image Blendig Red and Cyan
+            # Filter Color
+            red_img = PIL.ImageOps.colorize(imgL, (0, 0, 0), (255, 0, 0))  # Red
+            cyan_img = PIL.ImageOps.colorize(imgR, (0, 0, 0), (0, 255, 255))  # Image Cyan
             blend = PIL.Image.blend(red_img, cyan_img, 0.5)
+
             np_blend = np.array(blend)
             im_comb = imutils.resize(np_blend, height=600)
             im_comb = cv2.cvtColor(im_comb, cv2.COLOR_BGR2RGB) # Hasil Anaglyph
@@ -216,7 +244,7 @@ def File():
             global q; global w
             q1, w1, e = im_comb.shape
             file = 'Anaglyph'
-            cv2.imwrite(os.path.join(path, file + str(jumlah_img - i)) + '.tiff', im_comb)
+            cv2.imwrite(os.path.join(path, file + str(i-1)) + '.tiff', im_comb)
             img = Image.open(os.path.join(path, 'Anaglyph' + str(1)) + '.tiff')
 
             #menampilkan hasil citra
@@ -234,7 +262,7 @@ def File():
             path = tempfile.gettempdir()
 
             # Open Image
-            img = Image.open(os.path.join(path, 'Anaglyph' + str(Over + 1)) + '.tiff')
+            img = Image.open(os.path.join(path, 'Anaglyph' + str(Over-1)) + '.tiff')
 
             # Shape Image
             q=int(q1/1);w=int(w1/1)
@@ -246,8 +274,8 @@ def File():
             label2.image = uu
 
         #Scale
-        sequence = tkinter.Scale(display, from_=0, to=jumlah_img- 1, length=674,
-                                 resolution=1, showvalue=0, orient=tkinter.HORIZONTAL, command=scale)
+        sequence = tkinter.Scale(display, from_=0, to=(jumlah_img-1), length=674,
+                                 resolution=1, orient=tkinter.HORIZONTAL, command=scale)
         sequence.place(x=20, y=1075)
 
 
