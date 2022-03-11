@@ -96,14 +96,13 @@ def File():
                                 ('Image', "*.bmp"), ("Image", "*.jpg"),
                                 ("Image", "*.png"), ("Image", "*.txt")
                             ))
-
+        #Upload Image R
         global imgR
         imgR = PIL.Image.open(path_image, mode='r').convert('RGB')
         imgR = PIL.Image.open(path_image, mode='r').convert('L')
         display2.destroy()
 
         # Filter Color
-
         red_img = PIL.ImageOps.colorize(imgL, (0, 0, 0), (255, 0, 0))  # Red
         cyan_img = PIL.ImageOps.colorize(imgR, (0, 0, 0), (0, 255, 255))  # Image Cyan
 
@@ -131,12 +130,12 @@ def File():
         label.configure(image=uu)
         label.image = uu
 
-        # Nama File yang save
+        # Save image
         q, w,e = im_comb.shape
         cv2.imwrite(os.path.join(path, 'Anaglyph.tiff'), im_comb)
         img = Image.open(os.path.join(path, 'Anaglyph.tiff'))
 
-        # menampilkan hasil citra
+        # Menampilkan hasil citra
         img = img.resize((int(w/1.5), int(q/1.5)), Image.ANTIALIAS)
         uu = ImageTk.PhotoImage(img)
         label2.configure(image=uu)
@@ -152,132 +151,158 @@ def File():
                                 ("Image", "*.png"), ("Image", "*.txt")
                             ))
 
-        # menunut display 2
+        # Menutup display 2
         display2.destroy()
 
         #split image
         var=display.tk.splitlist(path_image)
         image=[]
-        global jumlah_img
 
         # jumlah banyak citra
+        global jumlah_img
         jumlah_img=len(var)
         print("jumlah image:", jumlah_img)
+
         for f in var:
             a=cv2.imread(f)
             image.append(a)
 
-        # input image
-        #image_overlap=20
+        # Proses Anaglyph
+        def OK ():
 
-        for i in range(jumlah_img):
+            #Input nilai rotasi
+            global image_overlap
+            image_overlap = int(ent1.get())
+            print('derajat rotasi :', image_overlap)
 
-            # Image Left
-            image_keL = i  # jumlah image input
+            # Menunut Display 3
+            display3.destroy()
 
-            # Image Right
-            image_keR = i + 20
+            # Proses Anaglyph
+            for i in range(jumlah_img):
 
-            if image_keR >= jumlah_img :
-                image_keR = image_keR - jumlah_img
-                print('image L:>', image_keL, 'nomor',i)
-                print('image R>:', image_keR)
+                # Image Left
+                image_keL = i  # jumlah image input
 
-                # Input image left (dibalik R ke L)
-                global imgL
-                cv2.imwrite(os.path.join(path, 'imgL.tiff'), image[image_keL])
-                imgL = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgL.tiff', mode='r').convert('RGB')
-                imgL = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgL.tiff', mode='r').convert('L')
+                # Image Right
+                image_keR = i + image_overlap
 
-                # Input image right (dan sebaliknya)
-                global imgR
-                cv2.imwrite(os.path.join(path, 'imgR.tiff'), image[image_keR])
-                imgR = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgR.tiff', mode='r').convert('RGB')
-                imgR = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgR.tiff', mode='r').convert('L')
+                # jika image R sudah melewati jumlah citra yang dianaglyph
+                if image_keR >= jumlah_img:
 
+                    image_keR = image_keR - jumlah_img # penguranagan image
+                    print('image L:>', image_keL, 'nomor', i)
+                    print('image R>:', image_keR)
+
+                    # Input image left
+                    global imgL
+                    cv2.imwrite(os.path.join(path, 'imgL.tiff'), image[image_keL])
+                    imgL = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgL.tiff', mode='r').convert('RGB')
+                    imgL = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgL.tiff', mode='r').convert('L')
+
+                    # Input image right
+                    global imgR
+                    cv2.imwrite(os.path.join(path, 'imgR.tiff'), image[image_keR])
+                    imgR = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgR.tiff', mode='r').convert('RGB')
+                    imgR = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgR.tiff', mode='r').convert('L')
+
+
+                else: # Jika citra r tidak melebihi jumlah citra yang dianaglypj
+                    print('image L:', image_keL, 'nomor', i)
+                    print('image R:', image_keR)
+
+                    # Input image left
+                    cv2.imwrite(os.path.join(path, 'imgL.tiff'), image[image_keL])
+                    imgL = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgL.tiff', mode='r').convert('RGB')
+                    imgL = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgL.tiff', mode='r').convert('L')
+
+                    # Input image right
+                    cv2.imwrite(os.path.join(path, 'imgR.tiff'), image[image_keR])
+                    imgR = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgR.tiff', mode='r').convert('RGB')
+                    imgR = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgR.tiff', mode='r').convert('L')
+
+                # Image Blendig Red and Cyan
                 # Filter Color
                 red_img = PIL.ImageOps.colorize(imgL, (0, 0, 0), (255, 0, 0))  # Red
                 cyan_img = PIL.ImageOps.colorize(imgR, (0, 0, 0), (0, 255, 255))  # Image Cyan
                 blend = PIL.Image.blend(red_img, cyan_img, 0.5)
 
+                # Image blending
+                np_blend = np.array(blend)
+                im_comb = imutils.resize(np_blend, height=600)
+                im_comb = cv2.cvtColor(im_comb, cv2.COLOR_BGR2RGB)  # Hasil Anaglyph
 
-            else:
-                print('image L:', image_keL, 'nomor', i)
-                print('image R:', image_keR)
+                # Image concatenate
+                numpy_hor = np.concatenate((red_img, cyan_img), axis=1)
+                numpy_hor = cv2.cvtColor(numpy_hor, cv2.COLOR_BGR2RGB)
+                a, b, c = numpy_hor.shape
+                cv2.imwrite(os.path.join(path, 'Red an Cyan.tiff'), cv2.resize(numpy_hor, (0, 0), None, .7, .7))
+                img_con = Image.open(os.path.join(path, 'Red an Cyan.tiff'))
 
-                # Input image left
-                cv2.imwrite(os.path.join(path, 'imgL.tiff'), image[image_keL])
-                # cv2.imwrite(('Lllllxxxx'+str(i)+'.tiff'), image[image_keL])
-                imgL = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgL.tiff', mode='r').convert('RGB')
-                imgL = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgL.tiff', mode='r').convert('L')
+                # Menampilkan citra awal
+                img_con = img_con.resize((int(b / 1.7), int(a / 1.7)), Image.ANTIALIAS)
+                uu = ImageTk.PhotoImage(img_con)
+                label.configure(image=uu)
+                label.image = uu
 
-                # Input image right
-                cv2.imwrite(os.path.join(path, 'imgR.tiff'), image[image_keR])
-                # cv2.imwrite(('Rrrrrrxxxx' + str(i) + '.tiff'), image[image_keR])
-                imgR = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgR.tiff', mode='r').convert('RGB')
-                imgR = PIL.Image.open(r'C:\Users\Madeena\AppData\Local\Temp\imgR.tiff', mode='r').convert('L')
+                # Nama File yang save
+                global q; global w
+                q1, w1, e = im_comb.shape
+                file = 'Anaglyph'
+                cv2.imwrite(os.path.join(path, file + str(i - 1)) + '.tiff', im_comb)
+                img = Image.open(os.path.join(path, 'Anaglyph' + str(1)) + '.tiff')
 
-            # Image Blendig Red and Cyan
-            # Filter Color
-            red_img = PIL.ImageOps.colorize(imgL, (0, 0, 0), (255, 0, 0))  # Red
-            cyan_img = PIL.ImageOps.colorize(imgR, (0, 0, 0), (0, 255, 255))  # Image Cyan
-            blend = PIL.Image.blend(red_img, cyan_img, 0.5)
+                # menampilkan hasil citra
+                q = int(q1 / 1);
+                w = int(w1 / 1)
 
-            np_blend = np.array(blend)
-            im_comb = imutils.resize(np_blend, height=600)
-            im_comb = cv2.cvtColor(im_comb, cv2.COLOR_BGR2RGB) # Hasil Anaglyph
+                # menampilkan citra
+                img = img.resize((w, q), Image.ANTIALIAS)
+                uu = ImageTk.PhotoImage(img)
+                label2.configure(image=uu)
+                label2.image = uu
 
-            # image concatenate
-            numpy_hor = np.concatenate((red_img, cyan_img), axis=1)
-            numpy_hor = cv2.cvtColor(numpy_hor, cv2.COLOR_BGR2RGB)
-            a,b,c=numpy_hor.shape
-            cv2.imwrite(os.path.join(path, 'Red an Cyan.tiff'), cv2.resize(numpy_hor, (0, 0), None, .7, .7))
-            img_con = Image.open(os.path.join(path, 'Red an Cyan.tiff'))
+            def scale(value: None):
+                global Over; global q; global w
+                Over = (int(sequence.get())) # input nomor
+                path = tempfile.gettempdir()
 
-            # menampilkan citra awal
-            img_con = img_con.resize((int(b / 1.7), int(a / 1.7)), Image.ANTIALIAS)
-            uu = ImageTk.PhotoImage(img_con)
-            label.configure(image=uu)
-            label.image = uu
+                # Open Image
+                img = Image.open(os.path.join(path, 'Anaglyph' + str(Over - 1)) + '.tiff')
 
-            # Nama File yang save
-            global q; global w
-            q1, w1, e = im_comb.shape
-            file = 'Anaglyph'
-            cv2.imwrite(os.path.join(path, file + str(i-1)) + '.tiff', im_comb)
-            img = Image.open(os.path.join(path, 'Anaglyph' + str(1)) + '.tiff')
+                # Shape Image
+                q = int(q1 / 1);
+                w = int(w1 / 1)
 
-            #menampilkan hasil citra
-            # Shape
-            q=int(q1/1); w=int(w1/1)
-            # menampilkan citra
-            img = img.resize((w,q), Image.ANTIALIAS)
-            uu = ImageTk.PhotoImage(img)
-            label2.configure(image=uu)
-            label2.image = uu
+                # menampilkan citra scale
+                img = img.resize((w, q), Image.ANTIALIAS)
+                uu = ImageTk.PhotoImage(img)
+                label2.configure(image=uu)
+                label2.image = uu
 
-        def scale(value:None):
-            global Over; global q; global w
-            Over = (int(sequence.get()))
-            path = tempfile.gettempdir()
+            # Scale
+            sequence = tkinter.Scale(display, from_=0, to=(jumlah_img - 1), length=674,
+                                     resolution=1, orient=tkinter.HORIZONTAL, command=scale)
+            sequence.place(x=20, y=1075)
 
-            # Open Image
-            img = Image.open(os.path.join(path, 'Anaglyph' + str(Over-1)) + '.tiff')
+        #Display daerah overlapping
+        width = 350
+        height = 250
+        display3 = tk.Tk()
+        display3.minsize(width=width, height=height)
+        display3.resizable(True, True)
 
-            # Shape Image
-            q=int(q1/1);w=int(w1/1)
+        # input
+        lab = tkinter.Label(display3, text="Rotasi")
+        lab.place(x=20, y=20)
+        ent1 = tkinter.Entry(display3, width=5)
+        ent1.place(x=110, y=23)
 
-            # menampilkan citra scale
-            img = img.resize((w, q), Image.ANTIALIAS)
-            uu = ImageTk.PhotoImage(img)
-            label2.configure(image=uu)
-            label2.image = uu
+        btn_file = tkinter.Button(display3, text="OK", width=10, command=OK)
+        btn_file.place(x=60, y=160)
 
-        #Scale
-        sequence = tkinter.Scale(display, from_=0, to=(jumlah_img-1), length=674,
-                                 resolution=1, orient=tkinter.HORIZONTAL, command=scale)
-        sequence.place(x=20, y=1075)
-
+        display3.title("Rotasi")
+        display3.mainloop()
 
     # Display 2
     width = 350
@@ -286,35 +311,31 @@ def File():
     display2.minsize(width=width, height=height)
     display2.resizable(True, True)
 
-    #button
     # Button
-    btn_pilihan1 = tkinter.Button(display2, text="1", width=10, command=Satu)
+    btn_pilihan1 = tkinter.Button(display2, text="Citra ", width=10, command=Satu)
     btn_pilihan1.place(x=50, y=100)
 
-    btn_pilihan2 = tkinter.Button(display2, text="2", width=10, command=Dua)
-    btn_pilihan2.place(x=100, y=150)
+    btn_pilihan2 = tkinter.Button(display2, text="Citra 360", width=10, command=Dua)
+    btn_pilihan2.place(x=200, y=100)
 
     display2.title("Menu")
     display2.mainloop()
 
 def Save():
-    global lab_img
-    global trim
-    global nilai_pixel
-    global nilai_unsharp
-    global jumlah
-    global filePaths
 
     file = filedialog.asksaveasfilename(initialdir=os.getcwd(), title='save image')
 
-    for i in range(jumlah):
+    for i in range(jumlah_img):
         path = tempfile.gettempdir()
 
         # hasil 8 bit menjadi 16 bit
-        img = np.array(hasil, dtype=np.uint16)
-        img = cv2.normalize(img, dst=None, alpha=0, beta=65535, norm_type=cv2.NORM_MINMAX)  # hasil 16 bit
+        img = cv2.imread(os.path.join(path, 'Anaglyph' + str(i - 1)) + '.tiff')
 
-        io.imsave((file + str(jumlah - i)) + '.tiff', img)
+        # img = np.array(img, dtype=np.uint16)
+        # img = cv2.normalize(img, dst=None, alpha=0, beta=65535, norm_type=cv2.NORM_MINMAX)  # hasil 16 bit
+        cv2.imwrite((file + str(i-1)) + '.tiff', img)
+
+        #cv2.imwrite((file + str(i-1)) + '.tiff', img)
     messagebox.showinfo('Save', ' Semua citra telah tersimpan')
 
 
