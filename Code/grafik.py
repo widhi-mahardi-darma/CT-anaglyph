@@ -101,11 +101,11 @@ for i in range(x_image-1):
 
 
     pergeseran=int(nilai_pengurangan[i])
-    print(pergeseran)
+   # print(pergeseran)
 
     if pergeseran <=-1:
         pergeseran = abs(pergeseran)
-        print('kurang')
+        #print('kurang')
         # print('PERGESERAN',pergeseran)  # dibagi mejadi2
         hitam1 = image2[0: y + 0, 0: n + 0] #n=1
         hitam2 = image2[0: pergeseran + 0, 0:s + 0] #s=1
@@ -122,7 +122,7 @@ for i in range(x_image-1):
         img22 = hasilimg2
 
     else:
-        print('lebih')
+        #print('lebih')
         # print('PERGESERAN',pergeseran)  # dibagi mejadi2
         hitam1 = image2[0: y_image + 0, 0: n + 0]
         hitam2 = image2[0: pergeseran + 0, 0:s + 0]
@@ -141,12 +141,3 @@ for i in range(x_image-1):
     # gabungan
     gabung = cv2.hconcat([gabung, hasilimg2])
 cv2.imwrite('gabung.tiff', gabung)
-
-
-
-
-
-
-
-
-
