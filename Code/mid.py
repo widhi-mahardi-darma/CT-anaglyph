@@ -4,38 +4,44 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # input Image
-image=cv2.imread('baru.tiff',0)
+image=cv2.imread('241.png',0)
 
-# diketahui
+# Deteksi Tepi
+edges = cv2.Canny(image=image, threshold1=100, threshold2=200) # Dapat divariasi
+cv2.imwrite('edge.tiff',edges) # Save Image
+
+''' Menampilkan Plot '''
+plt.subplot(2,2,1),plt.imshow(image,cmap = 'gray')
+plt.title('Original'), plt.xticks([]), plt.yticks([])
+plt.subplot(2,2,2),plt.imshow(edges,cmap = 'gray')
+plt.title('Edge'), plt.xticks([]), plt.yticks([])
+plt.show()
+
+# Diketahui :
 nilai_CoM=[]
 nilai_poli=[]
 nilai_pengurangan=[]
 nilai_koreksi=[]
 
-# shape
+# Shape
 y_image, x_image = image.shape
 print(image.shape)
 
-# image1 = image[0: y_image + 0, int(x_image/2): int(x_image/2)+1 + 0]
-#
-# mid_y, l= ndi.center_of_mass(image1)
-# print('nilai tengah', mid_y)
-
-# CenterofMass
+# Image Awal Potongan
 gabung = image[0: y_image + 0, 0: 1 + 0]
 
+# TODO: Mencari Center of Mass
 for i in range(x_image-1):
-    #image 1
+    # Cut Image 1
     image1 = image[0: y_image + 0, x_image-(x_image-i): i+1 + 0]
+    m,n=image1.shape # Shape image
+    cv2.imwrite('image1.tiff',image1) # Image Save
 
-    m,n=image1.shape
-    cv2.imwrite('image1.tiff',image1)
-
-    #image 1
+    # Image Read
     img = cv2.imread('image1.tiff')
-
+    # Hasil CoM
     cy, cx,_= ndi.center_of_mass(img)
-    nilai_CoM.append(int(cy))
+    nilai_CoM.append(int(cy)) # Result CoM
     print(cy)
 
 mid_y=nilai_CoM[int(x_image/2)]
@@ -126,4 +132,4 @@ for i in range(x_image-1):
         gabung = cv2.hconcat([gabung, hasilimg2])
 
 
-cv2.imwrite('gabung_tes.tiff', gabung)
+cv2.imwrite('hasil_mid.tiff', gabung)
