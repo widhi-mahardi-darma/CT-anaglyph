@@ -1,13 +1,15 @@
 import tkinter
 import cv2
-import matplotlib.pyplot as plt
+
 import numpy as np
+from matplotlib.backend_bases import key_press_handler
 import scipy.ndimage as ndi
 import math
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
 NavigationToolbar2Tk)
 from tkinter import filedialog, messagebox
+import matplotlib.pyplot as plt    
 
 
 # Layout
@@ -20,14 +22,15 @@ display.resizable(True,True)
 # diketahui
 x_image=''
 nilai_CoM=''
+plot1=''
+Y=''
 canvas=''
 nilai_CoM = []
-Y=[]
+Fit=[]
 
 
 def File():
     global x_image
-
     path_image = filedialog. \
         askopenfilename(initialdir="/", title="Image Left",
                         filetypes=(
@@ -67,8 +70,7 @@ def File():
     plot1.legend()
     plot1.grid()
 
-    canvas = FigureCanvasTkAgg(fig,
-                               master=display)
+    canvas = FigureCanvasTkAgg(fig,master=display)
     canvas.draw()
 
     # placing the canvas on the Tkinter window
@@ -81,13 +83,41 @@ def File():
 
     # placing the toolbar on the Tkinter window
     canvas.get_tk_widget().pack()
+    plt.close('all')
+
+def Derajat():
+
+    Frekuensi = float(frekuensi.get())
+    frame = float(Frame.get())
+
+    # TODO: Frame,Radian and derajat
+    '''Rad'''
+    text_Radian = tkinter.Label(display, text="Radian")
+    text_Radian.place(x=150, y=700)
+    rad = Frekuensi * frame
+    rad_entry = tkinter.Entry(display, width=10)
+    rad_entry.place(x=150, y=725)
+
+    rad_entry.delete(0, tkinter.END)
+    rad_entry.insert(0, round(rad,3))
+
+    '''derajat'''
+    text_derajat = tkinter.Label(display, text="derajat")
+    text_derajat.place(x=260, y=700)
+    derajat = 180 * rad / math.pi
+
+    derajat_entry = tkinter.Entry(display, width=10)
+    derajat_entry.place(x=270, y=725)
+
+    derajat_entry.delete(0, tkinter.END)
+    derajat_entry.insert(0, round(derajat,3))
+
 
 def plot():
-    global Y
+    global Fit
     global nilai_CoM
     global x_image
-    global canvas
-
+    global plot1
 
     #Grafik
     y= np.array(nilai_CoM)
@@ -102,57 +132,16 @@ def plot():
     for i in range (x_image-1):
         Sin=math.sin(Frekuensi*i+Phase)
         fitting=Amplitudo*Sin+Constanta
-        Y.append(fitting)
-    Y=np.array(Y)
+        Fit.append(fitting)
+    Y=np.array(Fit)
 
-    fig=Figure(figsize=(7,5), dpi=100)
+    plt.plot(x,Y, color='red', label='Fitting Model') # Merah
+    plt.plot(x, y, '--', color='blue', label='COI') # Biru
+    plt.legend()
+    plt.grid()
+    plt.show()
 
-    # adding the subplot
-    plot1 = fig.add_subplot(111)
-
-    plot1.plot(x,Y, color='red', label='Fitting Model') # Merah
-    plot1.plot(x, y, '--', color='blue', label='COI') # Biru
-    plot1.legend()
-    plot1.grid()
-
-    canvas = FigureCanvasTkAgg(fig,
-                               master=display)
-    canvas.draw()
-
-    # placing the canvas on the Tkinter window
-    canvas.get_tk_widget().pack()
-
-    # creating the Matplotlib toolbar
-    toolbar = NavigationToolbar2Tk(canvas,
-                                   display)
-    toolbar.update()
-
-    # placing the toolbar on the Tkinter window
-    canvas.get_tk_widget().pack()
-
-    # TODO: Frame,Radian and derajat
-
-    '''Frame'''
-    text_Frame = tkinter.Label(display, text="Frame")
-    text_Frame.place(x=40, y=700)
-    frame = tkinter.Entry(display, width=10)
-    frame.place(x=40, y=725)
-    '''Rad'''
-    text_Radian = tkinter.Label(display, text="Radian")
-    text_Radian.place(x=150, y=700)
-    rad= Frekuensi*frame
-    rad_entry = tkinter.Entry(display, width=10)
-    rad_entry.place(x=150, y=725)
-
-    rad_entry.delete(0, tkinter.END)
-    rad_entry.insert(0, rad)
-
-    '''derajat'''
-    text_derajat = tkinter.Label(display, text="derajat")
-    text_derajat.place(x=260, y=700)
-    derajat= 180*rad/math.pi
-
-
+    Fit.clear()
 
 # Menubar
 Menu=tkinter.Menu(display)
@@ -178,6 +167,15 @@ plot_button = tkinter.Button(master = display, command = plot, height = 2,
 # in main window
 plot_button.place(x=470, y=610)
 
+# button that displays the plot
+jangkauan = tkinter.Button(master = display, command = Derajat, height = 2,
+                             width = 20, text = "Derajat Jangkuan")
+
+# place the button
+# in main window
+jangkauan.place(x=470, y=710)
+
+
 #TODO: Input data Plot
 '''Amplitudo'''
 text_amplitudo = tkinter.Label(display, text="Amplitudo")
@@ -187,15 +185,15 @@ amplitudo.place(x=40, y=625)
 
 '''Phase'''
 text_phase = tkinter.Label(display, text="Phase")
-text_phase.place(x=150, y=600)
+text_phase.place(x=260, y=600)
 phase = tkinter.Entry(display, width=10)
-phase.place(x=150, y=625)
+phase.place(x=260, y=625)
 
 '''Frekuensi'''
 text_frekuensi = tkinter.Label(display, text="Frekuensi")
-text_frekuensi.place(x=260, y=600)
+text_frekuensi.place(x=150, y=600)
 frekuensi = tkinter.Entry(display, width=10)
-frekuensi.place(x=260, y=625)
+frekuensi.place(x=150, y=625)
 
 '''Constanta'''
 text_Constanta = tkinter.Label(display, text="Constanta")
@@ -203,8 +201,14 @@ text_Constanta.place(x=370, y=600)
 constanta = tkinter.Entry(display, width=10)
 constanta.place(x=370, y=625)
 
+'''Frame'''
+text_Frame = tkinter.Label(display, text="Frame")
+text_Frame.place(x=40, y=700)
+Frame = tkinter.Entry(display, width=10)
+Frame.place(x=40, y=725)
+
 
 
 # Layout
-display.title("DoI")
+display.title("COI")
 display.mainloop()
