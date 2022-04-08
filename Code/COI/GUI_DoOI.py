@@ -241,35 +241,35 @@ text_amplitudo = tkinter.Label(display, text="Amplitudo")
 text_amplitudo.place(x=40, y=600)
 amplitudo = tkinter.Entry(display, width=10)
 amplitudo.place(x=40, y=625)
-amplitudo.insert(0, round(30,3))
+amplitudo.insert(0, round(20,5))
 
 '''Phase'''
 text_phase = tkinter.Label(display, text="Phase")
 text_phase.place(x=260, y=600)
 phase = tkinter.Entry(display, width=10)
 phase.place(x=260, y=625)
-phase.insert(0, round(-2.48,3))
+phase.insert(0, round(1.01,5))
 
 '''Frekuensi'''
 text_frekuensi = tkinter.Label(display, text="Frekuensi")
 text_frekuensi.place(x=150, y=600)
 frekuensi = tkinter.Entry(display, width=10)
 frekuensi.place(x=150, y=625)
-frekuensi.insert(0, round(2.5,3))
+frekuensi.insert(0, round(0.01,5))
 
 '''Constanta'''
 text_Constanta = tkinter.Label(display, text="Constanta")
 text_Constanta.place(x=370, y=600)
 constanta = tkinter.Entry(display, width=10)
 constanta.place(x=370, y=625)
-constanta.insert(0, round(620,3))
+constanta.insert(0, round(200,5))
 
 '''Frame'''
 text_Frame = tkinter.Label(display, text="Frame")
 text_Frame.place(x=40, y=700)
 Frame = tkinter.Entry(display, width=10)
 Frame.place(x=40, y=725)
-Frame.insert(0, round(299,3))
+Frame.insert(0, round(360,3))
 
 
 
