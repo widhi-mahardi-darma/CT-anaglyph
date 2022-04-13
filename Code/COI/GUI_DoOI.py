@@ -17,13 +17,8 @@ display.minsize(width=width, height=height)
 display.resizable(True,True)
 
 # diketahui
-x_image=''
-nilai_CoM=''
-Y=''
-canvas=''
-nilai_CoM = []
-Fit=[]
-y=''
+x_image='' ; nilai_CoM='' ; canvas=''
+nilai_CoM = [] ; Fit=[] ; y=''
 
 def image (): # image
     global x_image, output
@@ -35,6 +30,7 @@ def image (): # image
     output = None
     nilai_CoM.clear()
 
+    #Input data
     path_image = filedialog. \
         askopenfilename(multiple=True, initialdir="/", title="Open Image",
                         filetypes=(
@@ -71,7 +67,7 @@ def image (): # image
 
     # adding the subplot
     plot1 = fig.add_subplot(111)
-    plot1.plot(x, y, '--', color='blue', label='COI')  # Biru
+    plot1.plot(x, y, color='blue', label='COI')  # Biru
     plot1.legend()
     plot1.grid()
 
@@ -118,7 +114,7 @@ def File(): # sinogram
     # adding the subplot
     plot1 = fig.add_subplot(111)
 
-    plot1.plot(x, y, '--', color='blue', label='COI')  # Biru
+    plot1.plot(x, y, color='blue', label='COI')  # Biru
     plot1.legend()
     plot1.grid()
 
@@ -190,7 +186,7 @@ def plot():
     plot1 = fig.add_subplot(111)
 
     plot1.plot(x, Y, color='red', label='Fitting Model')  # Merah
-    plot1.plot(x, y, '--', color='blue', label='COI')  # Biru
+    plot1.plot(x, y, color='blue', label='COI')  # Biru
     plot1.legend()
     plot1.grid()
 
@@ -221,8 +217,8 @@ canvas.place(x=27.5, y=3)
 # Create menu
 file_menu= tkinter.Menu(Menu)
 Menu.add_cascade(label='File', menu=file_menu)
-file_menu.add_command(label='Open', command=File)
-file_menu.add_command(label ='Save', command=image)
+file_menu.add_command(label='Open', command=image)
+#file_menu.add_command(label ='Save', command=image)
 
 # button Plot
 plot_button = tkinter.Button(master = display, command = plot, height = 2,
