@@ -10,6 +10,7 @@ import numpy as np
 import tkinter.font as tkFont
 from tkinter import filedialog, Scale
 import matplotlib.pyplot as plt
+import tempfile
 
 '''''
 1. belum dapat di slide 
@@ -17,6 +18,7 @@ import matplotlib.pyplot as plt
 3. label belum pas
 4. image processing bdelum bisa'''
 Label=''
+path_save=''
 
 class App:
     def __init__(self, root): # Display
@@ -101,7 +103,7 @@ class App:
         Citra_button["justify"] = "center"
         Citra_button["text"] = "Citra"
         Citra_button.place(x=40, y=690, width=75, height=58)
-        Citra_button["command"] = self.Open_button_command
+        Citra_button["command"] = self.Citra
 
         """---------Sinogram------------------"""
         Sinogram_button = tk.Button(root)
@@ -114,7 +116,7 @@ class App:
         Sinogram_button["text"] = "Sinogram "
         Sinogram_button["relief"] = "raised"
         Sinogram_button.place(x=150, y=690, width=74, height=58)
-        Sinogram_button["command"] = self.Interpolation
+        Sinogram_button["command"] = self.Sinogram
 
         """-----------------Save Hasil---------------------"""
         Save_Hasil_button = tk.Button(root)
@@ -133,6 +135,9 @@ class App:
     def Open_button_command(self):
         global proj
         global Label
+        global total_image
+
+        save_temp=tempfile.gettempdir()
         img = filedialog.askopenfilename(multiple=True, initialdir='/', title='select file',
                                          filetypes=(
                                              ("Image", "*.tiff"), ("Image", "*.tif"),
@@ -143,8 +148,15 @@ class App:
         # Total image
         total_image = int(len(img))
         print('image',img)
-        print(total_image)
+        print('Total Image:',total_image)
         proj = dxchange.read_tiff_stack(img[0], range(0, total_image))
+
+        '''----------Sinogram--------------'''
+        #plt.imshow(proj[:, 0, :])
+        dxchange.write_tiff(proj[:, 0, :], save_temp, overwrite=True)
+        #plt.show()  # sinogram
+
+
         img = proj[0,:,:]
         print(img.shape)
         L_i,P_i=img.shape
@@ -171,7 +183,6 @@ class App:
             plt.imshow(proj[Scale,:,:])
             img = proj[Scale,:,:]
             L_i, P_i= img.shape
-            print(img.shape)
             img_view = Image.fromarray(img)
             img_view = ImageTk.PhotoImage(img_view)
             Label.configure(image=img_view)
@@ -183,23 +194,26 @@ class App:
         slider.place(x=40, y=617)
 
 
-    # def updateValue(self, event):
-    #     if self._job:
-    #         self.root.after_cancel(self._job)
-    #     self._job = self.root.after(500, self._do_something)
-    #
-    # def _do_something(self):
-    #     self._job = None
-    #     print ("new value:", self.slider.get())
-
-
     def Interpolation(self):
         print("command")
 
     def Recon_button_command(self):
+        global path_save
+        path_temp=tempfile.gettempdir()
         hshift = 30
         vshift = 150
+
+
+
         data = proj
+
+        #BELUM DAPAT DIGUNAKAN
+
+        # sino = dxchange.read_tiff_stack(proj, range(1, 360))
+        # plt.imshow(sino[:, 0, :])
+        # dxchange.write_tiff(sino[:, 0, :], D, overwrite=True)
+        # plt.show()  # sinogram
+
         data = tomopy.remove_nan(data, val=0.0)
         data = tomopy.remove_neg(data, val=0.00)
         data[np.where(data == np.inf)] = 0.00
@@ -211,6 +225,8 @@ class App:
         a = np.mod(com, 1)
         print(a)
         print(com)
+
+
         # recon = tomopy.recon(data, theta, center=503, algorithm='fbp')
         # 424.5
         # recon = tomopy.circ_mask(recon, axis=0, ratio=0.80)
@@ -222,13 +238,71 @@ class App:
         recon = tomopy.circ_mask(recon, axis=0, ratio=0.95)
         # plt.imshow(recon[10, :, :])
         # plt.show()
+
+        '''''Save image'''''
         path_save = filedialog.asksaveasfilename(initialdir=os.getcwd(),title='Save Reconstructed Image')
         print(path_save)
         dxchange.write_tiff_stack(recon, path_save, overwrite=True)
 
+        '''' Save temp'''
+        dxchange.write_tiff_stack(recon, path_temp, overwrite=True)
+
 
     def Save_button_command(self):
         global proj
+
+    def Citra (self):
+        global path_temp
+
+        # Total image
+        img_citra = r'C:\Users\Madeena\AppData\Local\Temp_00000.tiff'
+        total_citra=int(len(img_citra))
+        print('total_citra',total_citra)
+        proj = dxchange.read_tiff_stack(img_citra, range(0, total_citra))
+        img_citra = proj[0, :, :]
+        print(img_citra.shape)
+        L_i, P_i = img_citra.shape
+
+
+
+        img_view = cv2.resize(img_citra, (int(P_i / 2), int(L_i / 2)), interpolation=cv2.INTER_AREA)
+        img_view = Image.fromarray(img_view)
+        img_view = ImageTk.PhotoImage(img_view)
+        Label.configure(image=img_view)
+        Label.image = img_view
+
+        def Scale(value: None):
+            Scale = int(slider.get())
+            print(Scale)
+            plt.imshow(proj[Scale, :, :])
+            img_citra = proj[Scale, :, :]
+            L_i, P_i = img_citra.shape
+            img_view = Image.fromarray(img)
+            img_view = ImageTk.PhotoImage(img_view)
+            Label.configure(image=img_view)
+            Label.image = img_view
+
+        # Scale
+        slider = tk.Scale(root, from_=0, to=total_citra - 1, length=674,
+                          resolution=1, orient=tkinter.HORIZONTAL, command=Scale)
+        slider.place(x=40, y=617)
+
+    def Sinogram(self):
+        #img_sino = cv2.imread(r'C:\Users\Madeena\AppData\Local\'Temp.tiff',0)
+
+        img_sino = cv2.imread(os.path.join(path_save,'Temp_00000.tiff'))
+
+        print(img_sino.shape)
+        #L_i, P_i = img_sino.shape
+        #size=(int(P_i / 2), int(L_i / 2))
+
+        img_view = cv2.resize(img_sino,(300,300), interpolation=cv2.INTER_AREA)
+        img_view = Image.fromarray(img_view)
+        img_view = ImageTk.PhotoImage(img_view)
+        Label.configure(image=img_view)
+        Label.image = img_view
+
+
 
 if __name__ == "__main__":
     root = tk.Tk()
